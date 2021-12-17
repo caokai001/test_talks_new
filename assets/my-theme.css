@@ -1,0 +1,58 @@
+.thankyou-barney {
+    background-image: url("gif/barney.gif");
+    background-size: contain;
+    background-position: center; 
+  }
+
+
+  /*******************************************************************************************************************************
+ * Colours
+ * NB: In LaTeX, colors may be defined in rgb (0-1). Can scale up to RGB (0-255) by simply multiplying the three numbers by 255
+ *     then can use 'https://www.google.com/search?channel=fs&client=Arial&q=rgb+to+hex' to convert to HEX and can use here
+ ******************************************************************************************************************************/
+.red {
+  color: red;
+}
+.myred {
+  color: #e62b4f;
+}
+.myblue {
+  color: #24568c;
+}
+.purple {
+  color: #3e2f5b;
+}
+.orange {
+  color: #ff8811;
+}
+.olive {
+  color: #334f17;
+}
+.Arialblue {
+  color: #035AA6;
+}
+.blue{
+  color: #0000FF;
+}
+.spanish-red {
+  color: #c60b1e;
+}
+.spanish-yellow {
+  color: #ffc400;
+}
+.blue90red60 {
+  color: #7e5dc9;
+}
+.blue60red90 {
+  color: #9350c7;
+}
+.lightgray {
+  color: #ededed; /*#d3d3d3*/
+}
+.uclblue {
+  /* https://www.cam.ac.uk/system/files/guidelines_v8_december_2019.pdf */
+  color: #93328E;
+}
+.navbargrey{
+  color: #D5D5D5;
+}

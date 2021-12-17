@@ -1,0 +1,376 @@
+---
+title: "consort：临床研究流程图构建工具"
+# subtitle: "a comparative analysis of excess mortality"
+author: 阿力木·达依木
+date: 20/11/2021
+institute: "Department of Oncology | University of Cambridge"
+params: 
+   conference: "第14届中国R会议"
+   location: "北京"
+   short_title: "consort包"
+output:
+  xaringan::moon_reader:
+    includes: 
+       in_header: "assets/latex_macros.html" 
+       macro: 'my_macros.js'
+       after_body: "assets/timer.html"
+    seal: false
+    yolo: false
+    lib_dir: libs
+    nature:
+      beforeInit: "assets/macros.js"
+      highlightStyle: github
+      highlightLines: yes
+      countIncrementalSlides: no
+      # countdown: 60000
+      ratio: '16:9'
+      titleSlideClass:
+      - center
+      - middle
+    self_contained: false 
+    css:
+      - "assets/xaringan-themer.css"
+      - "assets/my-theme.css"
+---
+
+```{r echo=F,message=FALSE,warning=FALSE,comment=NA}
+# Sources the R file with all the relevant setup and commands
+source("assets/setup.R")
+
+# This allows the use of panels (from 'xaringanExtra')
+xaringanExtra::use_panelset()
+# This allows to copy code from the slides directly
+xaringanExtra::use_clipboard()
+# This freezes the frame for when there's a gif included
+xaringanExtra::use_freezeframe()
+# This allows draw on slides.
+xaringanExtra::use_scribble()
+# This highlight the code
+xaringanExtra::use_extra_styles(hover_code_line = TRUE, mute_unhighlighted_code = FALSE)
+
+# Defines the path to the file with the .bib entries (in case there are references)
+# bibfile=ReadBib("~/Dropbox/Perso/Office/CV/mypubs.bib",check = FALSE)
+library(xaringanthemer)
+style_mono_light(base_color = "#23395b")
+
+
+# Prepare data for demo
+set.seed(1001)
+N <- 300
+
+trialno <- sample(c(1000:2000), N)
+exc1 <- rep(NA, N)
+exc1[sample(1:N, 15)] <- sample(c("Sample not collected", "MRI not collected",
+                                  "Other"), 15, replace = T, prob = c(0.4, 0.4, 0.2))
+
+induc <- rep(NA, N)
+induc[is.na(exc1)] <- trialno[is.na(exc1)]
+
+exc2 <- rep(NA, N)
+exc2[sample(1:N, 20)] <- sample(c("Sample not collected", "Dead",
+                                  "Other"), 20, replace = T, prob = c(0.4, 0.4, 0.2))
+exc2[is.na(induc)] <- NA
+
+exc <- ifelse(is.na(exc2), exc1, exc2)
+
+arm <- rep(NA, N)
+arm[is.na(exc)] <- sample(c("Conc", "Seq"), sum(is.na(exc)), replace = T)
+arm3 <- sample(c("Trt A", "Trt B", "Trt C"), N, replace = T)
+arm3[is.na(arm)] <- NA
+
+fow1 <- rep(NA, N)
+fow1[!is.na(arm)] <- sample(c("Withdraw", "Discontinued", "Death", "Other", NA),
+                            sum(!is.na(arm)), replace = T, 
+                            prob = c(0.05, 0.05, 0.05, 0.05, 0.8))
+fow2 <- rep(NA, N)
+fow2[!is.na(arm) & is.na(fow1)] <- sample(c("Protocol deviation", "Outcome missing", NA),
+                                          sum(!is.na(arm) & is.na(fow1)), replace = T, 
+                                          prob = c(0.05, 0.05, 0.9))
+
+df <- data.frame(trialno, exc, arm, arm3, fow1, fow2)
+rm(trialno, exc, arm, arm3, fow1, fow2, N)
+
+```
+
+
+class: title-slide, center, middle
+
+# `r rmarkdown::metadata$title``r vspace("10px")` `r rmarkdown::metadata$subtitle`
+
+### `r rmarkdown::metadata$author`
+
+### `r rmarkdown::metadata$institute`
+
+### `r rmarkdown::metadata$params$conference`, `r rmarkdown::metadata$params$location` 
+<!-- Can also separate the various components of the extra argument 'params', eg as in 
+### `r paste(rmarkdown::metadata$params, collapse=", ")`
+-->
+
+`r date`
+
+---
+
+
+
+## CONSORT标准
+
+- 科学家和专家组于1995年提出了临床试验（RCT）报告标准CONSORT声明，并于2000年的修订版中加入了核对表（checklist）和流程图（flow diagram）。
+
+
+--
+- 众多优秀的国际期刊投稿者提供流程图，同时该流程图的应用从RCT逐渐扩展到其临床研究以及流行病学领域。
+
+
+--
+- 资助方、伦理学审查委员会或监管机构要求提供CONSORT流程图。
+
+
+--
+- 进行数据管理时可以通过CONSORT流程图监测临床研究中人群的入排情况。
+
+---
+
+`r include_fig("consort-flow-diagram.png",width="65%",title="")`
+
+.footnote[图片来源：[http://www.consort-statement.org/consort-statement/flow-diagram](http://www.consort-statement.org/consort-statement/flow-diagram) ]
+
+---
+
+
+## CONSORT流程与绘制存在的问题
+
+.left-column[
+![](./img/is_there_a_problem.gif)
+]
+
+.right-column[
+- 利用Word修改文字内容，需要根据数据结果填写里面的内容，包括原因以及数字。
+
+- 数据更新以后需要重新校对先前的流程图，并对里面的内容和数字进行更新，费时的同时存在出错的可能性。
+
+- 流程图需要手动插入到最后的研究报告中，可重复性低。
+]
+
+---
+
+## 现有R流程图绘制软件包
+
+- .large[[**ggplot2**](https://rpubs.com/phiggins/461686)]：需要绘制空白页面，.red[需要给定坐标轴和宽度添加文字框以及箭头]。
+
+- .large[**DiagrammeR**]：使用方便，但是需要给定各个节点直接的链接，.red[新增节点时可能会导致流程图改变]。
+
+- .large[**diagram**]：一开始就需要.red[给定节点的分布情况]，而后逐步将各个节点进行链接，节点的.red[外框不会自动随文字内容进行调节]。
+
+- .large[**Gmisc**]：.red[自己给定坐标轴]，需要考虑节点重合的问题
+
+
+![:scale 50%](img/Seriously-Sherlock-Holmes.gif)
+
+---
+
+## consort包安装
+
+```{r, eval=FALSE}
+install.packages("consort")
+```
+
+## 数据准备
+```{r, eval=FALSE}
+df
+```
+```{r echo=FALSE}
+DT::datatable(
+  df,
+  fillContainer = FALSE, rownames = FALSE,
+  options = list(pageLength = 5, bLengthChange=0,
+                 bFilter=0, bInfo=1)
+)
+```
+
+---
+
+## 未随机分组
+
+.panelset[
+.panel[.panel-name[代码]
+
+```{r consort-plot1, fig.width = 7, fig.show='hide'}
+library(consort)
+p <- consort_plot(data = df,
+                  orders = c(trialno = "Population",
+                             exc    = "Excluded",
+                             arm     = "Registered",
+                             fow1    = "Lost of Follow-up",
+                             trialno = "Finished Followup",
+                             fow2    = "Not evaluable for the final analysis",
+                             trialno = "Final Analysis"),
+                  side_box = c("exc", "fow1", "fow2"),
+                  labels = c("1" = "Screening", "2" = "Enrolled",
+                              "4" = "Final"),
+                  cex = 0.9)
+plot(p)
+```
+]
+
+.panel[.panel-name[图]
+`r include_fig("consort-plot1-1.png",width="43%",title="")`
+]
+]
+
+---
+
+## 三个分组
+
+.panelset[
+.panel[.panel-name[代码]
+
+```{r consort-plot2, fig.width = 10, fig.show='hide'}
+p <- consort_plot(data = df,
+                  orders = c(trialno = "Population",
+                             exc     = "Excluded",
+                             arm3    = "Randomized patient",
+                             fow1    = "Lost of Follow-up",
+                             trialno = "Finished Followup",
+                             fow2    = "Not evaluable",
+                             trialno = "Final Analysis"),
+                  side_box = c("exc", "fow1", "fow2"),
+                  allocation = "arm3", #<<
+                  labels = c("1" = "Screening", "2" = "Randomization",
+                             "5" = "Final"))
+plot(p)
+
+```
+]
+
+.panel[.panel-name[图]
+`r include_fig("consort-plot2-1.png",width="55%",title="")`
+]
+]
+
+---
+
+## 自己计算
+
+.panelset[
+.panel[.panel-name[代码]
+
+```{r consort-plot-self, fig.width = 11, fig.show='hide'}
+df$arm <- factor(df$arm)
+txt <- gen_text(df$trialno, label = "Patient consented")
+g <- add_box(txt = txt)
+txt <- gen_text(df$exc, label = "Excluded", bullet = TRUE)
+g <- add_side_box(g, txt = txt)   
+# Exclude subjects
+df <- df[is.na(df$exc), ]
+g <- add_box(g, txt = gen_text(df$arm, label = "Patients randomised")) 
+txt <- gen_text(df$arm)
+g <- add_split(g, txt = txt)
+txt <- gen_text(split(df$fow1, df$arm),
+                label = "Lost to follow-up", bullet = TRUE)
+g <- add_box(g, txt = txt, just = "left")
+df <- df[is.na(df$fow1), ]
+txt <- gen_text(split(df$trialno, df$arm),
+                label = "Primary analysis")
+g <- add_box(g, txt = txt)
+
+g <- add_label_box(g, txt = c("3" = "Baseline",
+                              "4" = "First Stage"))
+plot(g)
+```
+]
+
+.panel[.panel-name[图]
+`r include_fig("consort-plot-self-1.png",width="50%",title="")`
+]
+]
+
+---
+
+## 提供文字
+
+.panelset[
+.panel[.panel-name[代码]
+
+```{r consort-plot3, results = "hide", fig.width = 10, fig.show='hide'}
+library(grid)
+options(txt_gp = gpar(cex = 0.8))
+
+txt1 <- "知情同意 (n=300)"
+txt1_side <- "排除 (n=18):\n\u2022 不符合纳入标准 (n=6)\n\u2022 筛选未完成 (n=4)\n\u2022 其他 (n=8)"
+sp_txt <- c("排除 (n=21):\n\u2022 误随机化 (n=1)\n\u2022 出现不可接受的不良反应 (n=8)\n\u2022 方案偏移 (n=4)\n\u2022 其他 (n=8)",
+            "排除 (n=24):\n\u2022 研究者认为患者不适合继续研究方案治疗 (n=1)\n\u2022 出现不可接受的不良反应 (n=13)\n\u2022 怀孕 (n=1) \n\u2022 其他 (n=9)")
+
+# supports pipeline operator
+g <- add_box(txt = txt1) |>
+  add_side_box(txt = txt1_side) |> 
+  add_box(txt = "随机 (n=200)") |> 
+  add_split(txt = c("干预组 (n=141)", "对照组 (n=141)")) |> 
+  add_side_box(txt = sp_txt, text_width = 25) |> 
+  add_box(txt = c("可评估患者 (n=120)", "可评估患者 (n=117)")) |> 
+  add_label_box(txt = c("1" = "筛选",
+                        "3" = "随机化",
+                        "4" = "最终分析"))
+plot(g)
+```
+]
+
+.panel[.panel-name[图]
+`r include_fig("consort-plot3-1.png",width="60%",title="")`
+]
+]
+
+---
+
+## 全自定义
+
+.panelset[
+.panel[.panel-name[代码]
+
+```{r box-plot, fig.width = 10, fig.show='hide'}
+# 画节点
+stp1 <- textbox("RNA甲基化酶qPCR+WB验证\n细胞、动物或临床", 
+                x = 0.3, y = 0.9,
+                box_gp = gpar(fill = "cyan"))
+stp2 <- textbox("转录组测序/小RNA芯片", 
+                x = 0.7, y = 0.9,
+                box_fn = rectGrob,
+                box_gp = gpar(fill = "cyan"))
+
+stp3 <- textbox("甲基化酶敲除/敲低/过表达", 
+                x = 0.3, y = 0.5,
+                txt_gp = gpar(col = "red"))
+
+# 链接节点
+c12 <- connect_box(stp1, stp2, connect = c("rl"))
+c13 <- connect_box(stp1, stp3, connect = c("bt"))
+c23 <- connect_box(stp2, stp3, connect = c("bt"), type = "p")
+# 输出到屏幕
+grid.newpage()
+grid.draw(stp1);grid.draw(stp2);grid.draw(stp3)
+grid.draw(c12);grid.draw(c13);grid.draw(c23)
+```
+]
+
+.panel[.panel-name[图]
+`r include_fig("box-plot-1.png",width="50%",title="")`
+]
+]
+
+
+---
+
+
+## 总结
+
+1. 仅依赖`gtable`和`grid`两个包。
+2. 输出的是`gTree`对象，可以用`ggsave`输出。
+3. 灵活
+
+
+---
+
+
+class: thankyou-barney 
+
+
+

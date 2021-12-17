@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>consort：临床研究流程图构建工具</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="阿力木·达依木" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"Copy Code","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
+    <script src="libs/freezeframe/freezeframe.min.js"></script>
+    <script src="libs/xaringanExtra-freezeframe/freezeframe-init.js"></script>
+    <script id="xaringanExtra-freezeframe-options" type="application/json">{"selector":"img[src$=\"gif\"]","trigger":"click","overlay":false,"responsive":true,"warnings":true}</script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <link href="libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+    <script src="libs/datatables-binding/datatables.js"></script>
+    <script src="libs/jquery/jquery-3.6.0.min.js"></script>
+    <link href="libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+    <script src="libs/dt-core/js/jquery.dataTables.min.js"></script>
+    <link href="libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+    <script src="libs/crosstalk/js/crosstalk.min.js"></script>
+    <!-- (Re)Defines a bunch of LaTeX commands that can then be used directly in the .Rmd file as '\command{...}' -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      TeX: {
+        /* This enables color macros */
+        extensions: ["color.js"],
+        Macros: {
+          /* Probability & mathematical symbols */
+          Pr: "{\\style{font-family:inherit; font-size: 110%;}{\\text{Pr}}}",
+          exp: "{\\style{font-family:inherit; font-size: 105%;}{\\text{exp}}}",
+          log: "{\\style{font-family:inherit; font-size: 105%;}{\\text{log}}}",
+          ln: "{\\style{font-family:inherit; font-size: 105%;}{\\text{ln}}}",
+          logit: "{\\style{font-family:inherit; font-size: 100%;}{\\text{logit}}}",
+          HR: "{\\style{font-family:inherit; font-size: 105%;}{\\text{HR}}}",
+          OR: "{\\style{font-family:inherit; font-size: 105%;}{\\text{OR}}}",
+          E: "{\\style{font-family:inherit; font-size: 105%;}{\\text{E}}}",
+          Var: "{\\style{font-family:inherit; font-size: 105%;}{\\text{Var}}}",
+          Cov: "{\\style{font-family:inherit; font-size: 105%;}{\\text{Cov}}}",
+          Corr: "{\\style{font-family:inherit; font-size: 105%;}{\\text{Corr}}}",
+          DIC: "{\\style{font-family:inherit; font-size: 105%;}{\\text{DIC}}}",
+          se: "{\\style{font-family:inherit; font-size: 100%;}{\\text{se}}}",
+          sd: "{\\style{font-family:inherit; font-size: 100%;}{\\text{sd}}}",
+          kld: "{\\style{font-family:inherit; font-size: 100%;}{\\text{KLD}}}",
+          with: "{\\style{font-family:inherit; font-size: 100%;}{\\text{with}}}",
+          /* Distributions */
+          dnorm: "{\\style{font-family:inherit;}{\\text{Normal}}}",
+          dt: "{\\style{font-family:inherit;}{\\text{t}}}",
+          ddirch: "{\\style{font-family:inherit;}{\\text{Dirichlet}}}",
+          dmulti: "{\\style{font-family:inherit;}{\\text{Multinomial}}}",
+          dbeta: "{\\style{font-family:inherit;}{\\text{Beta}}}",
+          dgamma: "{\\style{font-family:inherit;}{\\text{Gamma}}}",
+          dbern: "{\\style{font-family:inherit;}{\\text{Bernoulli}}}",
+          dbin: "{\\style{font-family:inherit;}{\\text{Binomial}}}",
+          dpois: "{\\style{font-family:inherit;}{\\text{Poisson}}}",
+          dweib: "{\\style{font-family:inherit;}{\\text{Weibull}}}",
+          dexp: "{\\style{font-family:inherit;}{\\text{Exponential}}}",
+          dlnorm: "{\\style{font-family:inherit;}{\\text{logNormal}}}",
+          dunif: "{\\style{font-family:inherit;}{\\text{Uniform}}}",
+          /* LaTeX formatting */
+          bm: ["{\\boldsymbol #1}",1],
+          /* These create macros to typeset numbers in maths with the basic font */
+          0: "{\\style{font-family:inherit; font-size: 105%;}{\\text{0}}}",
+          1: "{\\style{font-family:inherit; font-size: 105%;}{\\text{1}}}",
+          2: "{\\style{font-family:inherit; font-size: 105%;}{\\text{2}}}",
+          3: "{\\style{font-family:inherit; font-size: 105%;}{\\text{3}}}",
+          4: "{\\style{font-family:inherit; font-size: 105%;}{\\text{4}}}",
+          5: "{\\style{font-family:inherit; font-size: 105%;}{\\text{5}}}",
+          6: "{\\style{font-family:inherit; font-size: 105%;}{\\text{6}}}",
+          7: "{\\style{font-family:inherit; font-size: 105%;}{\\text{7}}}",
+          8: "{\\style{font-family:inherit; font-size: 105%;}{\\text{8}}}",
+          9: "{\\style{font-family:inherit; font-size: 105%;}{\\text{9}}}",
+          /* Health economics quantities */
+          icer: "{\\style{font-family:inherit; font-size: 100%;}{\\text{ICER}}}",
+          nb: "{\\style{font-family:inherit; font-size: 100%;}{\\text{NB}}}",
+          ol: "{\\style{font-family:inherit; font-size: 100%;}{\\text{OL}}}",
+          ceac: "{\\style{font-family:inherit; font-size: 100%;}{\\text{CEAC}}}",
+          evpi: "{\\style{font-family:inherit; font-size: 100%;}{\\text{EVPI}}}",
+          evppi: "{\\style{font-family:inherit; font-size: 100%;}{\\text{EVPPI}}}",
+          evsi: "{\\style{font-family:inherit; font-size: 100%;}{\\text{EVSI}}}"
+        }
+      }
+    });
+    </script>
+    <link rel="stylesheet" href="assets/xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="assets/my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+class: title-slide, center, middle
+
+# consort：临床研究流程图构建工具&lt;span style="display:block; margin-top: 10px ;"&gt;&lt;/span&gt; 
+
+### 阿力木·达依木
+
+### Department of Oncology | University of Cambridge
+
+### 第14届中国R会议, 北京 
+&lt;!-- Can also separate the various components of the extra argument 'params', eg as in 
+### 第14届中国R会议, 北京, consort包
+--&gt;
+
+20/11/2021
+
+---
+
+
+
+## CONSORT标准
+
+- 科学家和专家组于1995年提出了临床试验（RCT）报告标准CONSORT声明，并于2000年的修订版中加入了核对表（checklist）和流程图（flow diagram）。
+
+
+--
+- 众多优秀的国际期刊投稿者提供流程图，同时该流程图的应用从RCT逐渐扩展到其临床研究以及流行病学领域。
+
+
+--
+- 资助方、伦理学审查委员会或监管机构要求提供CONSORT流程图。
+
+
+--
+- 进行数据管理时可以通过CONSORT流程图监测临床研究中人群的入排情况。
+
+---
+
+&lt;center&gt;&lt;img src=./img/consort-flow-diagram.png width='65%' title=''&gt;&lt;/center&gt;
+
+.footnote[图片来源：[http://www.consort-statement.org/consort-statement/flow-diagram](http://www.consort-statement.org/consort-statement/flow-diagram) ]
+
+---
+
+
+## CONSORT流程与绘制存在的问题
+
+.left-column[
+![](./img/is_there_a_problem.gif)
+]
+
+.right-column[
+- 利用Word修改文字内容，需要根据数据结果填写里面的内容，包括原因以及数字。
+
+- 数据更新以后需要重新校对先前的流程图，并对里面的内容和数字进行更新，费时的同时存在出错的可能性。
+
+- 流程图需要手动插入到最后的研究报告中，可重复性低。
+]
+
+---
+
+## 现有R流程图绘制软件包
+
+- .large[[**ggplot2**](https://rpubs.com/phiggins/461686)]：需要绘制空白页面，.red[需要给定坐标轴和宽度添加文字框以及箭头]。
+
+- .large[**DiagrammeR**]：使用方便，但是需要给定各个节点直接的链接，.red[新增节点时可能会导致流程图改变]。
+
+- .large[**diagram**]：一开始就需要.red[给定节点的分布情况]，而后逐步将各个节点进行链接，节点的.red[外框不会自动随文字内容进行调节]。
+
+- .large[**Gmisc**]：.red[自己给定坐标轴]，需要考虑节点重合的问题
+
+
+![:scale 50%](img/Seriously-Sherlock-Holmes.gif)
+
+---
+
+## consort包安装
+
+
+```r
+&gt; install.packages("consort")
+```
+
+## 数据准备
+
+```r
+&gt; df
+```
+<div id="htmlwidget-89379fba42347244d5dd" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-89379fba42347244d5dd">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[[1086,1418,1502,1846,1303,1838,1399,1202,1485,1355,1875,1203,1155,1067,1412,1668,1222,1565,1626,1625,1585,1747,1514,1091,1768,1519,1689,1014,1829,1474,1031,1188,1709,1951,1976,1711,1473,1647,1426,1653,1964,1769,1227,1180,1115,1150,1692,1676,1724,1854,1468,1931,1528,1619,1935,1275,1792,1443,1824,1503,1501,1627,1998,1529,1762,1033,1387,1001,1223,1084,1376,1110,1012,1810,1286,1133,1682,1999,1889,1946,1778,1632,1660,1727,1273,1621,1065,1716,1371,1809,1729,1282,1373,1274,1419,1828,1609,1341,1032,1269,1539,1029,1130,1835,1144,1590,1890,1266,1557,1172,1530,1894,1610,1789,1994,1490,1233,1085,1533,1658,1441,1705,1517,1118,1410,1982,1550,1090,1408,1570,1756,1239,1782,1398,1804,1458,1543,1733,1811,1119,1047,1198,1891,1375,1395,1695,1672,1962,1604,1186,1263,1696,1955,1278,1541,1231,1093,1492,1844,1651,1253,1745,1160,1903,1168,1649,1564,1356,1068,1221,1125,1416,1182,1876,1081,1228,1005,1363,1527,1693,1455,1034,1591,1630,1094,1636,1993,1777,1323,1146,1878,1238,1495,1869,1488,1758,1525,1260,1498,1017,1576,1463,1715,1104,1333,1684,1338,1506,1595,1178,1101,1836,1175,1242,1721,1423,1784,1461,1472,1030,1900,1259,1281,1815,1972,1794,1467,1827,1293,1484,1936,1078,1128,1825,1469,1791,1683,1515,1499,1544,1164,1025,1437,1208,1120,1952,1817,1786,1606,1977,1562,1710,1464,1940,1489,1397,1425,1808,1588,1645,1220,1910,1088,1571,1907,1572,1583,1026,1422,1486,1511,1381,1734,1056,1790,1058,1540,1839,1788,1098,1480,1388,1772,1342,1121,1442,1257,1374,1840,1930,1736,1581,1445,1551,1440,1241,1650,1642,1719,1638],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Sample not collected",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Sample not collected",null,null,null,null,null,null,null,null,null,"Other",null,null,null,null,null,null,null,null,null,null,"Dead",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Sample not collected",null,null,null,null,null,null,null,null,null,null,"Sample not collected",null,null,null,null,null,null,null,null,null,null,null,"Other",null,null,null,null,null,null,null,null,"Sample not collected",null,"Sample not collected","Other",null,null,null,null,"Other","Sample not collected",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"MRI not collected",null,null,"Sample not collected",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Sample not collected",null,"Sample not collected",null,null,"MRI not collected",null,"Sample not collected",null,null,null,null,null,"Dead",null,null,null,null,null,null,null,"Dead",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Other",null,null,null,null,null,null,"Sample not collected","Sample not collected","MRI not collected",null,"Dead","Other",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Sample not collected","Sample not collected",null,null,null,null,null,"Sample not collected",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Other",null,"Sample not collected","Other",null,null,null,null,null,null,null,null,null,null,null,"Sample not collected",null],["Conc","Seq","Seq","Seq","Seq","Conc","Seq","Conc","Conc","Conc","Seq","Seq","Seq","Conc","Conc","Conc","Conc","Seq",null,"Seq","Seq","Conc","Seq","Conc","Conc","Seq","Seq","Conc","Conc","Seq","Seq","Seq","Seq","Conc","Conc","Seq","Seq","Seq","Conc","Conc","Conc","Conc","Conc","Conc","Seq","Seq","Seq","Seq","Seq","Conc","Conc","Conc","Seq","Seq",null,"Seq","Conc","Conc","Conc","Conc","Conc","Conc","Conc","Seq",null,"Conc","Conc","Seq","Conc","Conc","Seq","Conc","Conc","Conc","Seq",null,"Conc","Seq","Conc","Conc","Conc","Conc","Conc","Conc","Seq","Seq","Conc","Seq","Conc","Conc","Conc","Conc","Seq",null,"Conc","Seq","Conc","Seq","Conc","Seq","Seq","Conc","Conc","Conc",null,"Conc","Seq","Conc","Seq","Conc","Seq","Seq","Conc","Conc","Seq","Seq",null,"Seq","Conc","Seq","Conc","Seq","Conc","Seq","Seq",null,"Seq",null,null,"Conc","Seq","Seq","Seq",null,null,"Conc","Seq","Conc","Conc","Conc","Conc","Seq","Conc","Conc","Conc","Conc","Conc","Seq","Conc","Conc","Conc","Conc",null,"Seq","Seq",null,"Conc","Conc","Conc","Seq","Seq","Conc","Seq","Conc","Seq","Seq","Conc","Seq","Seq","Conc","Conc","Seq","Conc",null,"Seq",null,"Conc","Seq",null,"Seq",null,"Seq","Conc","Conc","Seq","Seq",null,"Conc","Seq","Conc","Seq","Conc","Conc","Conc",null,"Conc","Seq","Seq","Conc","Seq","Conc","Conc","Seq","Conc","Seq","Conc","Seq","Conc","Seq","Conc","Conc","Conc","Conc","Conc","Seq","Conc","Conc","Seq",null,"Seq","Conc","Conc","Seq","Seq","Seq",null,null,null,"Conc",null,null,"Seq","Conc","Conc","Seq","Conc","Conc","Conc","Seq","Conc","Seq","Conc","Seq","Conc","Seq","Seq","Conc","Conc","Conc","Conc",null,null,"Conc","Seq","Seq","Seq","Seq",null,"Conc","Seq","Seq","Seq","Conc","Seq","Conc","Seq","Conc","Conc","Conc","Conc","Conc","Seq","Seq","Seq","Seq","Conc","Seq","Conc","Seq","Seq","Conc","Seq","Seq",null,"Seq",null,null,"Conc","Seq","Seq","Seq","Conc","Seq","Seq","Conc","Conc","Seq","Seq",null,"Seq"],["Trt C","Trt B","Trt C","Trt A","Trt A","Trt B","Trt A","Trt C","Trt C","Trt A","Trt C","Trt A","Trt B","Trt C","Trt A","Trt C","Trt B","Trt B",null,"Trt B","Trt C","Trt A","Trt B","Trt B","Trt B","Trt C","Trt C","Trt B","Trt C","Trt A","Trt C","Trt B","Trt B","Trt B","Trt C","Trt A","Trt C","Trt C","Trt C","Trt C","Trt A","Trt C","Trt A","Trt A","Trt B","Trt B","Trt C","Trt A","Trt A","Trt B","Trt A","Trt C","Trt C","Trt A",null,"Trt A","Trt A","Trt C","Trt B","Trt B","Trt A","Trt A","Trt A","Trt C",null,"Trt A","Trt A","Trt C","Trt B","Trt C","Trt B","Trt B","Trt C","Trt B","Trt C",null,"Trt C","Trt C","Trt C","Trt C","Trt B","Trt C","Trt C","Trt B","Trt A","Trt A","Trt B","Trt B","Trt C","Trt A","Trt A","Trt A","Trt A",null,"Trt A","Trt B","Trt C","Trt C","Trt A","Trt A","Trt A","Trt B","Trt B","Trt C",null,"Trt A","Trt C","Trt A","Trt B","Trt B","Trt A","Trt C","Trt B","Trt B","Trt C","Trt B",null,"Trt C","Trt C","Trt B","Trt C","Trt A","Trt C","Trt A","Trt A",null,"Trt C",null,null,"Trt B","Trt B","Trt A","Trt A",null,null,"Trt C","Trt A","Trt A","Trt C","Trt A","Trt C","Trt B","Trt A","Trt A","Trt C","Trt C","Trt B","Trt C","Trt C","Trt A","Trt C","Trt C",null,"Trt B","Trt B",null,"Trt A","Trt C","Trt C","Trt A","Trt C","Trt C","Trt C","Trt B","Trt A","Trt A","Trt B","Trt C","Trt A","Trt C","Trt A","Trt A","Trt A",null,"Trt C",null,"Trt B","Trt B",null,"Trt A",null,"Trt C","Trt C","Trt A","Trt C","Trt A",null,"Trt C","Trt A","Trt A","Trt C","Trt A","Trt C","Trt C",null,"Trt C","Trt A","Trt B","Trt B","Trt B","Trt A","Trt B","Trt C","Trt B","Trt B","Trt B","Trt A","Trt C","Trt A","Trt C","Trt B","Trt C","Trt A","Trt B","Trt C","Trt B","Trt B","Trt C",null,"Trt B","Trt A","Trt A","Trt A","Trt B","Trt C",null,null,null,"Trt A",null,null,"Trt B","Trt C","Trt C","Trt C","Trt A","Trt B","Trt B","Trt C","Trt B","Trt A","Trt C","Trt B","Trt C","Trt C","Trt B","Trt C","Trt C","Trt B","Trt A",null,null,"Trt C","Trt C","Trt A","Trt A","Trt C",null,"Trt B","Trt B","Trt A","Trt A","Trt A","Trt B","Trt B","Trt B","Trt C","Trt B","Trt A","Trt B","Trt A","Trt B","Trt A","Trt B","Trt A","Trt A","Trt C","Trt C","Trt B","Trt B","Trt C","Trt A","Trt B",null,"Trt C",null,null,"Trt B","Trt B","Trt C","Trt C","Trt B","Trt A","Trt C","Trt C","Trt B","Trt B","Trt A",null,"Trt B"],["Discontinued",null,null,null,"Discontinued",null,null,null,null,null,null,null,null,null,"Withdraw",null,null,null,null,null,null,null,null,"Discontinued","Death",null,null,null,null,null,null,null,null,null,null,"Death",null,null,"Death",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Death","Withdraw",null,null,null,null,"Discontinued",null,null,null,null,null,null,null,null,null,"Death",null,null,null,null,null,null,null,null,null,null,null,"Discontinued",null,null,null,null,null,null,null,null,null,null,null,null,"Discontinued","Withdraw",null,null,null,null,null,null,"Other",null,null,null,null,"Withdraw",null,null,"Other","Withdraw",null,null,null,null,null,null,null,null,null,null,"Discontinued",null,null,null,null,null,null,null,null,null,"Discontinued",null,null,null,null,null,null,null,null,null,null,null,null,null,"Withdraw",null,"Other",null,null,"Death",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Discontinued",null,null,null,null,null,null,null,"Other",null,null,null,null,"Death",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Discontinued","Discontinued",null,null,null,null,null,"Withdraw",null,"Discontinued",null,null,"Other",null,"Other","Other",null,null,null,null,null,null,null,null,null,"Withdraw","Withdraw",null,"Discontinued","Withdraw",null,null,null,null,null,null,"Withdraw",null,"Withdraw",null,"Withdraw",null,"Other",null,null,"Death",null,"Other",null,"Death",null,null,null,null,null,null,null,"Discontinued",null,null,"Death",null,null,null,null,null,null,null,null,"Discontinued","Discontinued",null,"Withdraw","Discontinued","Other",null,null,null,null,null,null,null,null,null,null,null,"Discontinued",null,null,"Death",null,null,null],[null,null,null,null,null,"Protocol deviation",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Outcome missing",null,null,null,null,null,null,"Outcome missing",null,null,null,"Protocol deviation",null,null,null,"Outcome missing",null,null,null,null,"Outcome missing",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Protocol deviation",null,null,"Protocol deviation",null,null,"Outcome missing",null,"Outcome missing",null,"Protocol deviation","Outcome missing",null,null,null,"Outcome missing",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Protocol deviation","Protocol deviation",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Outcome missing",null,null,null,null,null,"Protocol deviation",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Outcome missing",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Outcome missing",null,null,null,"Outcome missing",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Protocol deviation",null,null,null,"Outcome missing",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Protocol deviation",null,null,null,null,null,null,null,null,null,null,null,"Outcome missing",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"Protocol deviation",null,null,null,null]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>trialno<\/th>\n      <th>exc<\/th>\n      <th>arm<\/th>\n      <th>arm3<\/th>\n      <th>fow1<\/th>\n      <th>fow2<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"bLengthChange":0,"bFilter":0,"bInfo":1,"columnDefs":[{"className":"dt-right","targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+
+---
+
+## 未随机分组
+
+.panelset[
+.panel[.panel-name[代码]
+
+
+```r
+&gt; library(consort)
+&gt; p &lt;- consort_plot(data = df,
++                   orders = c(trialno = "Population",
++                              exc    = "Excluded",
++                              arm     = "Registered",
++                              fow1    = "Lost of Follow-up",
++                              trialno = "Finished Followup",
++                              fow2    = "Not evaluable for the final analysis",
++                              trialno = "Final Analysis"),
++                   side_box = c("exc", "fow1", "fow2"),
++                   labels = c("1" = "Screening", "2" = "Enrolled",
++                               "4" = "Final"),
++                   cex = 0.9)
+&gt; plot(p)
+```
+]
+
+.panel[.panel-name[图]
+&lt;center&gt;&lt;img src=./img/consort-plot1-1.png width='43%' title=''&gt;&lt;/center&gt;
+]
+]
+
+---
+
+## 三个分组
+
+.panelset[
+.panel[.panel-name[代码]
+
+
+```r
+&gt; p &lt;- consort_plot(data = df,
++                   orders = c(trialno = "Population",
++                              exc     = "Excluded",
++                              arm3    = "Randomized patient",
++                              fow1    = "Lost of Follow-up",
++                              trialno = "Finished Followup",
++                              fow2    = "Not evaluable",
++                              trialno = "Final Analysis"),
++                   side_box = c("exc", "fow1", "fow2"),
+*+                   allocation = "arm3",
++                   labels = c("1" = "Screening", "2" = "Randomization",
++                              "5" = "Final"))
+&gt; plot(p)
+```
+]
+
+.panel[.panel-name[图]
+&lt;center&gt;&lt;img src=./img/consort-plot2-1.png width='55%' title=''&gt;&lt;/center&gt;
+]
+]
+
+---
+
+## 自己计算
+
+.panelset[
+.panel[.panel-name[代码]
+
+
+```r
+&gt; df$arm &lt;- factor(df$arm)
+&gt; txt &lt;- gen_text(df$trialno, label = "Patient consented")
+&gt; g &lt;- add_box(txt = txt)
+&gt; txt &lt;- gen_text(df$exc, label = "Excluded", bullet = TRUE)
+&gt; g &lt;- add_side_box(g, txt = txt)   
+&gt; # Exclude subjects
+&gt; df &lt;- df[is.na(df$exc), ]
+&gt; g &lt;- add_box(g, txt = gen_text(df$arm, label = "Patients randomised")) 
+&gt; txt &lt;- gen_text(df$arm)
+&gt; g &lt;- add_split(g, txt = txt)
+&gt; txt &lt;- gen_text(split(df$fow1, df$arm),
++                 label = "Lost to follow-up", bullet = TRUE)
+&gt; g &lt;- add_box(g, txt = txt, just = "left")
+&gt; df &lt;- df[is.na(df$fow1), ]
+&gt; txt &lt;- gen_text(split(df$trialno, df$arm),
++                 label = "Primary analysis")
+&gt; g &lt;- add_box(g, txt = txt)
+&gt; 
+&gt; g &lt;- add_label_box(g, txt = c("3" = "Baseline",
++                               "4" = "First Stage"))
+&gt; plot(g)
+```
+]
+
+.panel[.panel-name[图]
+&lt;center&gt;&lt;img src=./img/consort-plot-self-1.png width='50%' title=''&gt;&lt;/center&gt;
+]
+]
+
+---
+
+## 提供文字
+
+.panelset[
+.panel[.panel-name[代码]
+
+
+```r
+&gt; library(grid)
+&gt; options(txt_gp = gpar(cex = 0.8))
+&gt; 
+&gt; txt1 &lt;- "知情同意 (n=300)"
+&gt; txt1_side &lt;- "排除 (n=18):\n\u2022 不符合纳入标准 (n=6)\n\u2022 筛选未完成 (n=4)\n\u2022 其他 (n=8)"
+&gt; sp_txt &lt;- c("排除 (n=21):\n\u2022 误随机化 (n=1)\n\u2022 出现不可接受的不良反应 (n=8)\n\u2022 方案偏移 (n=4)\n\u2022 其他 (n=8)",
++             "排除 (n=24):\n\u2022 研究者认为患者不适合继续研究方案治疗 (n=1)\n\u2022 出现不可接受的不良反应 (n=13)\n\u2022 怀孕 (n=1) \n\u2022 其他 (n=9)")
+&gt; 
+&gt; # supports pipeline operator
+&gt; g &lt;- add_box(txt = txt1) |&gt;
++   add_side_box(txt = txt1_side) |&gt; 
++   add_box(txt = "随机 (n=200)") |&gt; 
++   add_split(txt = c("干预组 (n=141)", "对照组 (n=141)")) |&gt; 
++   add_side_box(txt = sp_txt, text_width = 25) |&gt; 
++   add_box(txt = c("可评估患者 (n=120)", "可评估患者 (n=117)")) |&gt; 
++   add_label_box(txt = c("1" = "筛选",
++                         "3" = "随机化",
++                         "4" = "最终分析"))
+&gt; plot(g)
+```
+]
+
+.panel[.panel-name[图]
+&lt;center&gt;&lt;img src=./img/consort-plot3-1.png width='60%' title=''&gt;&lt;/center&gt;
+]
+]
+
+---
+
+## 全自定义
+
+.panelset[
+.panel[.panel-name[代码]
+
+
+```r
+&gt; # 画节点
+&gt; stp1 &lt;- textbox("RNA甲基化酶qPCR+WB验证\n细胞、动物或临床", 
++                 x = 0.3, y = 0.9,
++                 box_gp = gpar(fill = "cyan"))
+&gt; stp2 &lt;- textbox("转录组测序/小RNA芯片", 
++                 x = 0.7, y = 0.9,
++                 box_fn = rectGrob,
++                 box_gp = gpar(fill = "cyan"))
+&gt; 
+&gt; stp3 &lt;- textbox("甲基化酶敲除/敲低/过表达", 
++                 x = 0.3, y = 0.5,
++                 txt_gp = gpar(col = "red"))
+&gt; 
+&gt; # 链接节点
+&gt; c12 &lt;- connect_box(stp1, stp2, connect = c("rl"))
+&gt; c13 &lt;- connect_box(stp1, stp3, connect = c("bt"))
+&gt; c23 &lt;- connect_box(stp2, stp3, connect = c("bt"), type = "p")
+&gt; # 输出到屏幕
+&gt; grid.newpage()
+&gt; grid.draw(stp1);grid.draw(stp2);grid.draw(stp3)
+&gt; grid.draw(c12);grid.draw(c13);grid.draw(c23)
+```
+]
+
+.panel[.panel-name[图]
+&lt;center&gt;&lt;img src=./img/box-plot-1.png width='50%' title=''&gt;&lt;/center&gt;
+]
+]
+
+
+---
+
+
+## 总结
+
+1. 仅依赖`gtable`和`grid`两个包。
+2. 输出的是`gTree`对象，可以用`ggsave`输出。
+3. 灵活
+
+
+---
+
+
+class: thankyou-barney 
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="assets/macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<style type="text/css">.countdown {
+  background: transparent;
+  position: absolute;
+  cursor: pointer;
+  font-size: 2em;
+  line-height: 1.2;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 15px;
+  text-align: center;
+}
+
+code.countdown-time {
+  vertical-align: middle;
+}
+
+.countdown-digits {
+  color: #eaeaea;
+}
+
+.countdown.running {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.countdown.running .countdown-digits {
+  color: grey;
+}
+
+.countdown.finished {
+  border-color: #CC0033;
+  background-color: #5F6A72;
+}
+
+.countdown.finished .countdown-digits {
+  color: #CC0033;
+}
+
+.countdown.running.warning {
+  border-color: #CFAE24;
+  background-color: #E6C229;
+}
+
+.countdown.running.warning .countdown-digits {
+  color: #39300A;
+}
+
+@-webkit-keyframes blink {
+  from {opacity: 1}
+  50% {opacity: 0.1}
+  to {opacity: 1}
+}
+
+@keyframes blink {
+  from {opacity: 1}
+  50% {opacity: 0.1}
+  to {opacity: 1}
+}
+
+.countdown.running.blink-colon .countdown-digits.colon {
+  -webkit-animation: blink 2s steps(1, end) 0s infinite;
+  animation: blink 2s steps(1, end) 0s infinite;
+}
+
+</style>
+
+
+<script>var counters = {timer: {}};
+var update_timer = function(timer, force = false) {
+	var secs = timer.value;
+
+	// check if we should update timer or not
+	noup = timer.div.className.match(/noupdate-\d+/);
+	if (!force && noup != null) {
+	  noup = parseInt(noup[0].match(/\d+$/));
+	  if (secs > noup * 2 && secs % noup > 0) { return; }
+	}
+
+	// should we apply or remove warning class?
+	warnwhen = timer.div.dataset.warnwhen;
+	if (warnwhen && warnwhen > 0) {
+	  if (secs <= warnwhen && !timer.div.classList.contains("warning")) {
+	    timer.div.classList.add("warning");
+	  } else if (secs > warnwhen && timer.div.classList.contains("warning")) {
+	    timer.div.classList.remove("warning");
+	  }
+	}
+
+  var mins = Math.floor(secs / 60); // 1 min = 60 secs
+  secs -= mins * 60;
+
+  // Update HTML
+  timer.min.innerHTML = String(mins).padStart(2, 0);
+  timer.sec.innerHTML = String(secs).padStart(2, 0);
+}
+var countdown = function (e) {
+  target = e.target;
+  if (target.classList.contains("countdown-digits")) {
+    target = target.parentElement;
+  }
+  if (target.tagName == "CODE") {
+    target = target.parentElement;
+  }
+
+  // Init counter
+  if (!counters.timer.hasOwnProperty(target.id)) {
+    counters.timer[target.id] = {};
+    // Set the containers
+	  counters.timer[target.id].min = target.getElementsByClassName("minutes")[0];
+  	counters.timer[target.id].sec = target.getElementsByClassName("seconds")[0];
+  	counters.timer[target.id].div = target;
+  }
+
+  if (!counters.timer[target.id].running) {
+    if (!counters.timer[target.id].end) {
+      counters.timer[target.id].end   = parseInt(counters.timer[target.id].min.innerHTML) * 60;
+		  counters.timer[target.id].end  += parseInt(counters.timer[target.id].sec.innerHTML);
+    }
+
+    counters.timer[target.id].value = counters.timer[target.id].end;
+    update_timer(counters.timer[target.id]);
+    if (counters.ticker) counters.timer[target.id].value += 1;
+
+    // Start if not past end date
+    if (counters.timer[target.id].value > 0) {
+      base_class = target.className.replace(/\s?(running|finished)/, "")
+      target.className = base_class + " running";
+      counters.timer[target.id].running = true;
+
+      if (!counters.ticker) {
+        counters.ticker = setInterval(counter_update_all, 1000);
+      }
+    }
+  } else {
+    // Bump timer value if running & clicked
+    counters.timer[target.id].value += counter_bump_increment(counters.timer[target.id].end);
+    update_timer(counters.timer[target.id], force = true);
+    counters.timer[target.id].value += 1;
+  }
+};
+
+var counter_bump_increment = function(val) {
+  if (val <= 30) {
+    return 5;
+  } else if (val <= 300) {
+    return 15;
+  } else if (val <= 3000) {
+    return 30;
+  } else {
+    return 60;
+  }
+}
+
+var counter_update_all = function() {
+  // Iterate over all running timers
+  for (var i in counters.timer) {
+    // Stop if passed end time
+    console.log(counters.timer[i].id)
+    counters.timer[i].value--;
+    if (counters.timer[i].value <= 0) {
+      counters.timer[i].min.innerHTML = "00";
+      counters.timer[i].sec.innerHTML = "00";
+      counters.timer[i].div.className = counters.timer[i].div.className.replace("running", "finished");
+      counters.timer[i].running = false;
+    } else {
+      // Update
+      update_timer(counters.timer[i]);
+
+      // Play countdown sound if data-audio=true on container div
+      if (counters.timer[i].div.dataset.audio && counters.timer[i].value == 5) {
+        counter_play_sound();
+      }
+    }
+  }
+
+  // If no more running timers, then clear ticker
+  var timerIsRunning = false;
+  for (var t in counters.timer) {
+    timerIsRunning = timerIsRunning || counters.timer[t].running
+  }
+  if (!timerIsRunning) {
+    clearInterval(counters.ticker);
+    counters.ticker = null;
+  }
+}
+
+var counter_play_sound = function() {
+  try {
+    var finished_sound = new Audio('libs/countdown/smb_stage_clear.mp3');
+    finished_sound.play();
+  } catch (e) {
+    try {
+      var finished_sound = new Audio('smb_stage_clear.mp3');
+      finished_sound.play();
+    } catch (e) {
+      console.log("Unable to locate sound file smb_stage_clear.mp3.")
+    }
+  }
+}
+
+var counter_addEventListener = function() {
+  if (!document.getElementsByClassName("countdown").length) {
+    setTimeout(counter_addEventListener, 2);
+    return;
+  }
+  var counter_divs = document.getElementsByClassName("countdown");
+  console.log(counter_divs);
+  for (var i = 0; i < counter_divs.length; i++) {
+    counter_divs[i].addEventListener("click", countdown, false);
+  }
+};
+
+counter_addEventListener();
+</script>
+
+<div class="countdown" id="timer_5ddeaad6" style="bottom:0;z-index:100" data-warnwhen="0"><code class="countdown-time"><span class="countdown-digits minutes">20</span><span class="countdown-digits colon">:</span><span class="countdown-digits seconds">00</span></code>
+</div>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
